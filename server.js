@@ -19,6 +19,7 @@ if (process.env.NODE_ENV === "local") {
   app.use(
     cors({
       credentials: true,
+      origin: "https://mern-pic-editor-1.onrender.com",
     })
   );
 }
