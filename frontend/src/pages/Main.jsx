@@ -42,7 +42,13 @@ const Main = () => {
   });
 
   const [cropMode, setCropMode] = useState(false);
-  const [crop, setCrop] = useState({ unit: "%", width: 50, height: 50 });
+  const [crop, setCrop] = useState({
+    unit: "%",
+    width: 50,
+    height: 50,
+    x: 0,
+    y: 0,
+  });
   const [imageRef, setImageRef] = useState(null);
 
   const [components, setComponents] = useState([
@@ -175,7 +181,7 @@ const Main = () => {
   const setElements = (type, name) => {
     setState(type);
     setShow({
-      state: false,
+      status: false, // Corrected from `state: false`
       name,
     });
   };
@@ -302,6 +308,7 @@ const Main = () => {
   };
 
   const remove_background = () => {
+    if (!current_component) return; // Add a check
     const com = components.find((c) => c.id === current_component.id);
     const temp = components.filter((c) => c.id !== current_component.id);
     com.image = "";
@@ -453,6 +460,8 @@ const Main = () => {
     text,
     radius,
     rotate,
+    current_component, // Add current_component
+    components, // Add components
   ]);
 
   useEffect(() => {

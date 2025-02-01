@@ -54,8 +54,9 @@ const TemplateDesign = ({ type }) => {
       >
         {templates.map((design, i) => (
           <div
+            key={design._id} // Use a unique key
             onClick={() => add_template(design._id)}
-            className={`relative cursor-pointer group w-full  ${
+            className={`relative cursor-pointer group w-full ${
               type ? "h-[100px]" : " h-[170px] px-2"
             }`}
           >
