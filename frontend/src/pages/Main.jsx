@@ -292,8 +292,6 @@ const Main = () => {
     setComponents([...components, style]);
   };
 
-  const handleCrop = (id, newImage) => {};
-
   const add_image = (img) => {
     setCurrentComponent("");
     const id = Date.now();

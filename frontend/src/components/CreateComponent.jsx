@@ -1,4 +1,4 @@
-import { useState } from "react";
+/* eslint-disable react/prop-types */
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import Element from "./Element";
@@ -17,46 +17,6 @@ const CreateComponente = ({
   setImageRef,
   handleCrop,
 }) => {
-  const [cropMode, setCropMode] = useState(false);
-  const [crop, setCrop] = useState({ unit: "%", width: 50, height: 50 });
-  const [imageRef, setImageRef] = useState(null);
-
-  const getCroppedImg = async (image, crop) => {
-    const canvas = document.createElement("canvas");
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
-
-    canvas.width = crop.width * scaleX;
-    canvas.height = crop.height * scaleY;
-
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(
-      image,
-      crop.x * scaleX,
-      crop.y * scaleY,
-      crop.width * scaleX,
-      crop.height * scaleY,
-      0,
-      0,
-      crop.width * scaleX,
-      crop.height * scaleY
-    );
-
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        resolve(URL.createObjectURL(blob));
-      }, "image/jpeg");
-    });
-  };
-
-  const applyCrop = async () => {
-    if (imageRef && crop.width && crop.height) {
-      const croppedImageUrl = await getCroppedImg(imageRef, crop);
-      onCrop(info.id, croppedImageUrl);
-      setCropMode(false);
-    }
-  };
-
   let html = "";
 
   if (info.name === "main_frame") {
