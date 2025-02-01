@@ -28,8 +28,27 @@ const TemplateDesign = ({ type }) => {
     }
   };
 
+  const create_new_design = async () => {
+    try {
+      const { data } = await api.post("/api/create-user-design", {
+        // Optional: Pass any initial data for the new design
+      });
+      navigate(`/design/${data.design?._id}/edit`);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
+      <div className="mb-4">
+        <button
+          onClick={create_new_design}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
+          Create New Template
+        </button>
+      </div>
       <div
         className={`grid gap-2 ${type ? "grid-cols-2" : "grid-cols-4 mt-5"}`}
       >
