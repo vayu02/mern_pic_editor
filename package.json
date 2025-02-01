@@ -25,6 +25,7 @@
     "jwt-decode": "^4.0.0",
     "mongoose": "^7.3.2",
     "nodemon": "^3.1.9",
+    "react-easy-crop": "^5.2.0",
     "sharp": "^0.33.1"
   },
   "devDependencies": {

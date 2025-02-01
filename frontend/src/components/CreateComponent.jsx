@@ -1,7 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Element from "./Element";
-import ReactCrop from "react-image-crop";
-import "react-image-crop/dist/ReactCrop.css";
 
 const CreateComponente = ({
   info,
@@ -10,27 +8,21 @@ const CreateComponente = ({
   selectItem,
   setSelectItem,
 }) => {
-  const [crop, setCrop] = useState({ unit: "%", width: 50, height: 50 });
-  const [croppedImage, setCroppedImage] = useState(null);
   const [cropMode, setCropMode] = useState(false);
+  const [crop, setCrop] = useState({ unit: "%", width: 50, height: 50 });
   const [imageRef, setImageRef] = useState(null);
 
-  const handleCrop = (crop) => {
-    setCrop(crop);
-  };
-
-  const applyCrop = async () => {
-    if (!imageRef) return;
-
+  const getCroppedImg = async (image, crop) => {
     const canvas = document.createElement("canvas");
-    const scaleX = imageRef.naturalWidth / imageRef.width;
-    const scaleY = imageRef.naturalHeight / imageRef.height;
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+
     canvas.width = crop.width * scaleX;
     canvas.height = crop.height * scaleY;
-    const ctx = canvas.getContext("2d");
 
+    const ctx = canvas.getContext("2d");
     ctx.drawImage(
-      imageRef,
+      image,
       crop.x * scaleX,
       crop.y * scaleY,
       crop.width * scaleX,
@@ -41,9 +33,19 @@ const CreateComponente = ({
       crop.height * scaleY
     );
 
-    const croppedImageUrl = canvas.toDataURL();
-    setCroppedImage(croppedImageUrl);
-    setCropMode(false);
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        resolve(URL.createObjectURL(blob));
+      }, "image/jpeg");
+    });
+  };
+
+  const applyCrop = async () => {
+    if (imageRef && crop.width && crop.height) {
+      const croppedImageUrl = await getCroppedImg(imageRef, crop);
+      onCrop(info.id, croppedImageUrl);
+      setCropMode(false);
+    }
   };
 
   let html = "";
@@ -239,11 +241,11 @@ const CreateComponente = ({
     );
   }
 
-  {
-    info.name === "image" && (
+  if (info.name === "image") {
+    html = (
       <div
         id={info.id}
-        onClick={() => setSelectItem(info.id)}
+        onClick={() => info.setCurrentComponent(info)}
         style={{
           left: info.left + "px",
           top: info.top + "px",
@@ -256,17 +258,22 @@ const CreateComponente = ({
         } border-indigo-500`}
       >
         {selectItem === info.id && (
-          <button
-            className="absolute top-0 right-0 bg-white p-1 border"
-            onClick={() => setCropMode(true)}
-          >
-            Crop
-          </button>
+          <>
+            <Element id={info.id} info={info} exId={`${info.id}img`} />
+            {!cropMode && (
+              <button
+                className="absolute top-0 right-0 bg-white p-1 border"
+                onClick={() => setCropMode(true)}
+              >
+                Crop
+              </button>
+            )}
+          </>
         )}
 
         <div
-          id={`${info.id}img`}
           className="overflow-hidden"
+          id={`${info.id}img`}
           style={{
             width: info.width + "px",
             height: info.height + "px",
@@ -275,27 +282,36 @@ const CreateComponente = ({
         >
           {cropMode ? (
             <ReactCrop
-              src={info.image}
               crop={crop}
-              onChange={handleCrop}
+              onChange={(c) => setCrop(c)}
               onImageLoaded={setImageRef}
-            />
+            >
+              <img
+                src={info.image}
+                alt="image"
+                style={{ maxWidth: "100%", maxHeight: "100%" }}
+              />
+            </ReactCrop>
           ) : (
-            <img
-              className="w-full h-full"
-              src={croppedImage || info.image}
-              alt="image"
-            />
+            <img className="w-full h-full" src={info.image} alt="image" />
           )}
         </div>
 
         {cropMode && (
-          <button
-            className="absolute bottom-0 right-0 bg-green-500 text-white p-1"
-            onClick={applyCrop}
-          >
-            Apply Crop
-          </button>
+          <div className="absolute bottom-0 right-0 flex gap-2 p-2 bg-white">
+            <button
+              className="px-2 py-1 text-sm bg-red-500 text-white"
+              onClick={() => setCropMode(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="px-2 py-1 text-sm bg-green-500 text-white"
+              onClick={applyCrop}
+            >
+              Apply
+            </button>
+          </div>
         )}
       </div>
     );
