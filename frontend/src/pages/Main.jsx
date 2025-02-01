@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import { useParams } from "react-router-dom";
 import { BsGrid1X2, BsFillImageFill, BsFolder } from "react-icons/bs";
@@ -252,9 +252,11 @@ const Main = () => {
   };
 
   const handleCrop = (id, newImage) => {
-    setComponents(components.map(comp => 
-      comp.id === id ? { ...comp, image: newImage } : comp
-    ));
+    setComponents(
+      components.map((comp) =>
+        comp.id === id ? { ...comp, image: newImage } : comp
+      )
+    );
   };
 
   const add_image = (img) => {
