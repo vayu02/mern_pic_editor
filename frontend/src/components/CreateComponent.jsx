@@ -206,7 +206,7 @@ const CreateComponente = ({
                 </button>
                 <button
                   className="px-2 py-1 text-sm bg-green-500 text-white"
-                  onClick={() => handleCrop(info.id)}
+                  onClick={() => handleCrop(info.id, crop)}
                 >
                   Apply
                 </button>

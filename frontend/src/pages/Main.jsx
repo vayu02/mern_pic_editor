@@ -60,7 +60,7 @@ const Main = () => {
   ]);
 
   // Function to handle cropping
-  const handleCrop = async (id) => {
+  const handleCrop = async (id, crop) => {
     if (imageRef && crop.width && crop.height) {
       const canvas = document.createElement("canvas");
       const scaleX = imageRef.naturalWidth / imageRef.width;
@@ -88,12 +88,36 @@ const Main = () => {
         }, "image/jpeg");
       });
 
-      const updatedComponents = components.map((comp) =>
-        comp.id === id ? { ...comp, image: croppedImageUrl } : comp
-      );
-      setComponents(updatedComponents);
+      // Create a new component with the cropped image
+      createCroppedComponent(croppedImageUrl, crop);
       setCropMode(false); // Exit crop mode after applying
     }
+  };
+
+  const createCroppedComponent = (croppedImageUrl, crop) => {
+    const id = Date.now();
+    const style = {
+      id: id,
+      name: "image",
+      type: "image",
+      left: crop.x, // Position based on crop area
+      top: crop.y,
+      opacity: 1,
+      width: crop.width,
+      height: crop.height,
+      rotate: 0,
+      z_index: 2,
+      radius: 0,
+      image: croppedImageUrl,
+      setCurrentComponent: (a) => setCurrentComponent(a),
+      moveElement,
+      resizeElement,
+      rotateElement,
+    };
+
+    setSelectItem(id);
+    setCurrentComponent(style);
+    setComponents([...components, style]);
   };
 
   const setElements = (type, name) => {
