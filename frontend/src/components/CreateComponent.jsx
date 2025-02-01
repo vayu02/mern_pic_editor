@@ -1,4 +1,6 @@
 import { useState } from "react";
+import ReactCrop from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
 import Element from "./Element";
 
 const CreateComponente = ({
@@ -7,6 +9,13 @@ const CreateComponente = ({
   removeComponent,
   selectItem,
   setSelectItem,
+  cropMode,
+  setCropMode,
+  crop,
+  setCrop,
+  imageRef,
+  setImageRef,
+  handleCrop,
 }) => {
   const [cropMode, setCropMode] = useState(false);
   const [crop, setCrop] = useState({ unit: "%", width: 50, height: 50 });
@@ -71,6 +80,7 @@ const CreateComponente = ({
       </div>
     );
   }
+
   if (info.name === "shape" && info.type === "rect") {
     html = (
       <div
@@ -170,6 +180,7 @@ const CreateComponente = ({
       </div>
     );
   }
+
   if (info.name === "text") {
     html = (
       <div onClick={() => info.setCurrentComponent(info)}>
@@ -207,42 +218,7 @@ const CreateComponente = ({
   }
 
   if (info.name === "image") {
-    html = (
-      <div
-        id={info.id}
-        onClick={() => info.setCurrentComponent(info)}
-        style={{
-          left: info.left + "px",
-          top: info.top + "px",
-          zIndex: info.z_index,
-          transform: info.rotate ? `rotate(${info.rotate}deg)` : "rotate(0deg)",
-          opacity: info.opacity,
-        }}
-        className={`absolute group hover:border-[2px] ${
-          info.id === selectItem ? "border-[2px]" : ""
-        } border-indigo-500`}
-      >
-        {selectItem === info.id && (
-          <Element id={info.id} info={info} exId={`${info.id}img`} />
-        )}
-        <div
-          onMouseDown={() => info.moveElement(info.id, info)}
-          className="overflow-hidden"
-          id={`${info.id}img`}
-          style={{
-            width: info.width + "px",
-            height: info.height + "px",
-            borderRadius: `${info.radius}%`,
-          }}
-        >
-          <img className="w-full h-full" src={info.image} alt="image" />
-        </div>
-      </div>
-    );
-  }
-
-  if (info.name === "image") {
-    html = (
+    return (
       <div
         id={info.id}
         onClick={() => info.setCurrentComponent(info)}
@@ -260,13 +236,21 @@ const CreateComponente = ({
         {selectItem === info.id && (
           <>
             <Element id={info.id} info={info} exId={`${info.id}img`} />
-            {!cropMode && (
-              <button
-                className="absolute top-0 right-0 bg-white p-1 border"
-                onClick={() => setCropMode(true)}
-              >
-                Crop
-              </button>
+            {cropMode && (
+              <div className="absolute bottom-0 right-0 flex gap-2 p-2 bg-white">
+                <button
+                  className="px-2 py-1 text-sm bg-red-500 text-white"
+                  onClick={() => setCropMode(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-2 py-1 text-sm bg-green-500 text-white"
+                  onClick={() => handleCrop(info.id)}
+                >
+                  Apply
+                </button>
+              </div>
             )}
           </>
         )}
@@ -296,23 +280,6 @@ const CreateComponente = ({
             <img className="w-full h-full" src={info.image} alt="image" />
           )}
         </div>
-
-        {cropMode && (
-          <div className="absolute bottom-0 right-0 flex gap-2 p-2 bg-white">
-            <button
-              className="px-2 py-1 text-sm bg-red-500 text-white"
-              onClick={() => setCropMode(false)}
-            >
-              Cancel
-            </button>
-            <button
-              className="px-2 py-1 text-sm bg-green-500 text-white"
-              onClick={applyCrop}
-            >
-              Apply
-            </button>
-          </div>
-        )}
       </div>
     );
   }

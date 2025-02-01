@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import { useParams } from "react-router-dom";
 import { BsGrid1X2, BsFillImageFill, BsFolder } from "react-icons/bs";
 import { FaShapes, FaCloudUploadAlt, FaTrash } from "react-icons/fa";
-import { IoDuplicateOutline } from "react-icons/io5";
+import { IoChevronUpCircleOutline, IoDuplicateOutline } from "react-icons/io5";
 import { TfiText } from "react-icons/tfi";
 import { MdKeyboardArrowLeft } from "react-icons/md";
 import { RxTransparencyGrid } from "react-icons/rx";
@@ -41,6 +41,10 @@ const Main = () => {
     name: "",
   });
 
+  const [cropMode, setCropMode] = useState(false);
+  const [crop, setCrop] = useState({ unit: "%", width: 50, height: 50 });
+  const [imageRef, setImageRef] = useState(null);
+
   const [components, setComponents] = useState([
     {
       name: "main_frame",
@@ -54,6 +58,43 @@ const Main = () => {
       setCurrentComponent: (a) => setCurrentComponent(a),
     },
   ]);
+
+  // Function to handle cropping
+  const handleCrop = async (id) => {
+    if (imageRef && crop.width && crop.height) {
+      const canvas = document.createElement("canvas");
+      const scaleX = imageRef.naturalWidth / imageRef.width;
+      const scaleY = imageRef.naturalHeight / imageRef.height;
+
+      canvas.width = crop.width * scaleX;
+      canvas.height = crop.height * scaleY;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(
+        imageRef,
+        crop.x * scaleX,
+        crop.y * scaleY,
+        crop.width * scaleX,
+        crop.height * scaleY,
+        0,
+        0,
+        crop.width * scaleX,
+        crop.height * scaleY
+      );
+
+      const croppedImageUrl = await new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+          resolve(URL.createObjectURL(blob));
+        }, "image/jpeg");
+      });
+
+      const updatedComponents = components.map((comp) =>
+        comp.id === id ? { ...comp, image: croppedImageUrl } : comp
+      );
+      setComponents(updatedComponents);
+      setCropMode(false); // Exit crop mode after applying
+    }
+  };
 
   const setElements = (type, name) => {
     setState(type);
@@ -251,13 +292,7 @@ const Main = () => {
     setComponents([...components, style]);
   };
 
-  const handleCrop = (id, newImage) => {
-    setComponents(
-      components.map((comp) =>
-        comp.id === id ? { ...comp, image: newImage } : comp
-      )
-    );
-  };
+  const handleCrop = (id, newImage) => {};
 
   const add_image = (img) => {
     setCurrentComponent("");
@@ -432,7 +467,17 @@ const Main = () => {
             </span>
             <span className="text-xs font-medium">Project</span>
           </div>
-
+          <div
+            onClick={() => setCropMode(!cropMode)} // Toggle crop mode
+            className={`${
+              cropMode ? "bg-[#252627]" : ""
+            } w-full h-[80px] cursor-pointer flex justify-center flex-col items-center gap-1 hover:text-gray-100`}
+          >
+            <span className="text-2xl">
+              <IoChevronUpCircleOutline />
+            </span>
+            <span className="text-xs font-medium">Crop</span>
+          </div>
           <div
             onClick={() => setElements("initImage", "images")}
             className={`${
@@ -535,13 +580,19 @@ const Main = () => {
                 >
                   {components.map((c, i) => (
                     <CreateComponente
-                      selectItem={selectItem}
-                      setSelectItem={setSelectItem}
                       key={i}
                       info={c}
                       current_component={current_component}
                       removeComponent={removeComponent}
-                      onCrop={handleCrop}
+                      selectItem={selectItem}
+                      setSelectItem={setSelectItem}
+                      cropMode={cropMode}
+                      setCropMode={setCropMode}
+                      crop={crop}
+                      setCrop={setCrop}
+                      imageRef={imageRef}
+                      setImageRef={setImageRef}
+                      handleCrop={handleCrop}
                     />
                   ))}
                 </div>
