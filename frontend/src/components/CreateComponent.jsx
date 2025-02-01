@@ -16,6 +16,7 @@ const CreateComponente = ({
   imageRef,
   setImageRef,
   handleCrop,
+  handleRightClick,
 }) => {
   let html = "";
 
@@ -182,6 +183,7 @@ const CreateComponente = ({
       <div
         id={info.id}
         onClick={() => info.setCurrentComponent(info)}
+        onContextMenu={(e) => handleRightClick(e, info.id)} // Handle right-click
         style={{
           left: info.left + "px",
           top: info.top + "px",

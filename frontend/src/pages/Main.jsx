@@ -59,6 +59,58 @@ const Main = () => {
     },
   ]);
 
+  const [contextMenu, setContextMenu] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    targetId: null,
+  });
+
+  const handleRightClick = (e, id) => {
+    e.preventDefault(); // Prevent the default browser context menu
+    setContextMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      targetId: id,
+    });
+  };
+
+  const handleCropFromContextMenu = async () => {
+    const { targetId } = contextMenu;
+    if (targetId && imageRef && crop.width && crop.height) {
+      const canvas = document.createElement("canvas");
+      const scaleX = imageRef.naturalWidth / imageRef.width;
+      const scaleY = imageRef.naturalHeight / imageRef.height;
+
+      canvas.width = crop.width * scaleX;
+      canvas.height = crop.height * scaleY;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(
+        imageRef,
+        crop.x * scaleX,
+        crop.y * scaleY,
+        crop.width * scaleX,
+        crop.height * scaleY,
+        0,
+        0,
+        crop.width * scaleX,
+        crop.height * scaleY
+      );
+
+      const croppedImageUrl = await new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+          resolve(URL.createObjectURL(blob));
+        }, "image/jpeg");
+      });
+
+      // Create a new component with the cropped image
+      createCroppedComponent(croppedImageUrl, crop);
+      setContextMenu({ visible: false, x: 0, y: 0, targetId: null }); // Hide the context menu
+    }
+  };
+
   // Function to handle cropping
   const handleCrop = async (id, crop) => {
     if (imageRef && crop.width && crop.height) {
@@ -425,6 +477,19 @@ const Main = () => {
     get_design();
   }, [design_id]);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (contextMenu.visible && !e.target.closest(".context-menu")) {
+        setContextMenu({ visible: false, x: 0, y: 0, targetId: null });
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [contextMenu.visible]);
+
   return (
     <div className="min-w-screen h-screen bg-black">
       <Header components={components} design_id={design_id} />
@@ -615,6 +680,7 @@ const Main = () => {
                       imageRef={imageRef}
                       setImageRef={setImageRef}
                       handleCrop={handleCrop}
+                      handleRightClick={handleRightClick}
                     />
                   ))}
                 </div>
@@ -772,6 +838,33 @@ const Main = () => {
                               Add
                             </button>
                           </div>
+                          {contextMenu.visible && (
+                            <div
+                              style={{
+                                position: "fixed",
+                                top: contextMenu.y,
+                                left: contextMenu.x,
+                                zIndex: 1000,
+                                backgroundColor: "#252627",
+                                border: "1px solid #3c3c3d",
+                                borderRadius: "4px",
+                                padding: "8px",
+                                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+                              }}
+                            >
+                              <div
+                                onClick={handleCropFromContextMenu}
+                                style={{
+                                  padding: "4px 8px",
+                                  cursor: "pointer",
+                                  color: "#fff",
+                                  fontSize: "14px",
+                                }}
+                              >
+                                Crop
+                              </div>
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
